@@ -1,41 +1,105 @@
 const graphql = require('graphql');
 const _ = require('lodash');
+const axios = require('axios');
 const {
     GraphQLSchema,
     GraphQLObjectType,
+    GraphQLList,
     GraphQLString,
-    GraphQLInt
+    GraphQLInt,
+    GraphQLNonNull
 } = graphql;
-
-const users = [
-    { id: '23', firstName: 'Michael', age: 23 },
-    { id: '45', firstName: 'Samuel', age: 20 },
-    { id: '67', firstName: 'Oliver', age: 21 },
-    { id: '12', firstName: 'Janet', age: 32 },
-];
 
 const UserType = new GraphQLObjectType({
     name: 'User',
-    fields: {
-        id: { type: GraphQLString },
-        firstName: { type: GraphQLString },
-        age: { type: GraphQLInt }
-    }
+    fields: () => ({
+        id: { type: GraphQLInt },
+        name: { type: GraphQLString },
+        username: { type: GraphQLString },
+        email: { type: GraphQLString },
+        posts: {
+            type: new GraphQLList(PostType),
+            resolve(parentValue, args) {
+                return axios.get(`https://jsonplaceholder.typicode.com/users/${parentValue.userId}/posts`).then(res => {
+                    return res.data;
+                });
+            }
+        }
+    })
+});
+
+const PostType = new GraphQLObjectType({
+    name: 'Post',
+    fields: () => ({
+        id: { type: GraphQLInt },
+        title: { type: GraphQLString },
+        body: { type: GraphQLString },
+        user: {
+            type: UserType,
+            resolve(parentValue, args) {
+                return axios.get(`https://jsonplaceholder.typicode.com/users/${parentValue.userId}`).then(res => {
+                    return res.data;
+                });
+            }
+        }
+    })
 });
 
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
-    fields: {
+    fields: () => ({
         user: {
             type: UserType,
-            args: { id: { type: GraphQLString } },
+            args: { id: { type: GraphQLInt } },
             resolve(parentValue, args) {
-                return _.find(users, { id: args.id });
+                return axios.get(`https://jsonplaceholder.typicode.com/users/${args.id}`).then(res => {
+                    return res.data;
+                });
+            }
+        },
+        post: {
+            type: PostType,
+            args: { id: { type: GraphQLInt } },
+            resolve(parentValue, args) {
+                return axios.get(`https://jsonplaceholder.typicode.com/posts/${args.id}`).then(res => {
+                    return res.data;
+                });
             }
         }
-    }
+    })
+});
+
+const mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: () => ({
+        addUser: {
+            type: UserType,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                username: { type: new GraphQLNonNull(GraphQLString) },
+                email: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parentValue, { name, username, email }) {
+                return axios.post(`https://jsonplaceholder.typicode.com/users`, {
+                    name, username, email
+                }).then(res => res.data);
+            }
+        },
+        deleteUser: {
+            type: UserType,
+            args: { id: { type: new GraphQLNonNull(GraphQLInt) } },
+            resolve(parentValue, { id }) {
+                return axios.delete(`https://jsonplaceholder.typicode.com/users}`, {
+                    id
+                }).then(res => {
+                    return res.data;
+                })
+            }
+        }
+    })
 });
 
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation
 });
