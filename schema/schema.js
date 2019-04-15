@@ -10,10 +10,12 @@ const {
     GraphQLNonNull
 } = graphql;
 
+const User = require('../models/User');
+
 const UserType = new GraphQLObjectType({
     name: 'User',
     fields: () => ({
-        id: { type: GraphQLInt },
+        _id: { type: GraphQLString },
         name: { type: GraphQLString },
         username: { type: GraphQLString },
         email: { type: GraphQLString },
@@ -80,9 +82,7 @@ const mutation = new GraphQLObjectType({
                 email: { type: new GraphQLNonNull(GraphQLString) }
             },
             resolve(parentValue, { name, username, email }) {
-                return axios.post(`https://jsonplaceholder.typicode.com/users`, {
-                    name, username, email
-                }).then(res => res.data);
+                return User.create({ name, username, email }).then(user => user);
             }
         },
         deleteUser: {
