@@ -1,9 +1,6 @@
 const User = require('../models/User');
 const Post = require('../models/Post');
 
-const UserType = require('./User');
-const PostType = require('./Post');
-
 const graphql = require('graphql');
 const {
     GraphQLObjectType,
@@ -16,7 +13,7 @@ module.exports = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: () => ({
         user: {
-            type: UserType,
+            type: require('./User'),
             args: {
                 id: { type: new GraphQLNonNull(GraphQLString) }
             },
@@ -25,13 +22,13 @@ module.exports = new GraphQLObjectType({
             }
         },
         users: {
-            type: new GraphQLList(UserType),
+            type: new GraphQLList(require('./User')),
             resolve(parentValue, args) {
                 return User.find().then(users => users);
             }
         },
         post: {
-            type: PostType,
+            type: require('./Post'),
             args: {
                 id: { type: new GraphQLNonNull(GraphQLString) }
             },
@@ -40,7 +37,7 @@ module.exports = new GraphQLObjectType({
             }
         },
         posts: {
-            type: new GraphQLList(PostType),
+            type: new GraphQLList(require('./Post')),
             resolve(parentValue, args) {
                 return Post.find().then(posts => posts);
             }

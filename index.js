@@ -2,6 +2,8 @@ const express = require('express');
 const expressGraphQL = require('express-graphql');
 const schema = require('./schema');
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 
 require('./config/database');
@@ -18,6 +20,6 @@ app.get('/', (req, res, next) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('Server running on http://localhost:3000');
+app.listen(PORT, () => {
+    console.log('Server running on PORT ' + PORT);
 });

@@ -1,4 +1,5 @@
 const graphql = require('graphql');
+
 const Post = require('../models/Post');
 
 const {
@@ -14,12 +15,10 @@ module.exports = new GraphQLObjectType({
         username: { type: GraphQLString },
         email: { type: GraphQLString },
         posts: {
-            type: new GraphQLList(PostType),
+            type: new GraphQLList(require('./Post')),
             resolve({ _id }, args) {
                 return Post.find({ userId: _id }).then(posts => posts);
             }
         }
     })
 });
-
-const PostType = require('./Post');

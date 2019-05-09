@@ -1,4 +1,5 @@
 const graphql = require('graphql');
+
 const User = require('../models/User');
 
 const {
@@ -13,12 +14,10 @@ module.exports = new GraphQLObjectType({
         title: { type: GraphQLString },
         content: { type: GraphQLString },
         user: {
-            type: UserType,
+            type: require('./User'),
             resolve({ userId }, args) {
                 return User.findById(userId).then(user => user);
             }
         }
     })
 });
-
-const UserType = require('./User');

@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const uniqueValidator  = require('mongoose-unique-validator');
-const idvalidator = require('mongoose-id-validator');
 
 const PostSchema = mongoose.Schema({
     title: { type: String, required: true, unique: true },
@@ -9,6 +8,5 @@ const PostSchema = mongoose.Schema({
 });
 
 PostSchema.plugin(uniqueValidator);
-PostSchema.plugin(idvalidator);
 
 module.exports = mongoose.model('Post', PostSchema);
